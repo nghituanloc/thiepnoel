@@ -5,16 +5,34 @@ Thiệp chúc mừng Giáng Sinh và Năm Mới 2026 với hiệu ứng 3D tươ
 ## ✨ Tính Năng
 
 ### 🎨 Giao Diện 3D Tương Tác
-- **Cây thông 3D** chi tiết với nhiều tầng lá và hiệu ứng phong phú
+
+#### Cây Thông Chính
+- **Cây thông 3D** chi tiết với 12 tầng lá và hiệu ứng phong phú
 - **Ngôi sao vàng** lấp lánh trên đỉnh với vòng halo phát sáng
 - **36 bóng đèn LED** nhiều màu sắc nhấp nháy
 - **18 quả trang trí** kim loại óng ánh
 - **4 hộp quà** đẹp mắt với nơ chi tiết
+- **Dây ribbon vàng** quấn quanh cây thông
+
+#### Background Giáng Sinh Lung Linh
+- **2 người tuyết** (snowmen) đáng yêu với khăn quàng đỏ
+- **6 cây thông nhỏ** xung quanh tạo bầu không khí rừng tuyết
+- **Hàng rào tuyết** phủ trắng hai bên
+- **2 đèn cột đường** phát sáng ấm áp
+- **5 sao băng** (shooting stars) lướt qua bầu trời
+- **3 đám mây tuyết** nhẹ nhàng trôi
+- **4 kẹo gậy** (candy canes) Giáng Sinh
+- **2 chuông vàng** đung đưa
+- **12 dấu chân** trên tuyết
+- **12 đống tuyết** ngẫu nhiên
+
+#### Hiệu Ứng Particles
 - **300 hạt tuyết** rơi tự nhiên với texture tùy chỉnh
 - **120 ngôi sao** xa lấp lánh trên bầu trời
 - **80 sparkles** nhiều màu xung quanh cây
 - **25 fireflies** bay lượn lung linh
-- **Dây ribbon vàng** quấn quanh cây thông
+- **60 magic dust** lấp lánh trong không khí
+- **80 sparkles mặt đất** tạo hiệu ứng lấp lánh
 
 ### 🎮 Tương Tác
 - **Xoay cảnh**: Kéo chuột hoặc swipe trên mobile
