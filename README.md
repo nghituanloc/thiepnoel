@@ -15,16 +15,28 @@ Thiệp chúc mừng Giáng Sinh và Năm Mới 2026 với hiệu ứng 3D tươ
 - **Dây ribbon vàng** quấn quanh cây thông
 
 #### Background Giáng Sinh Lung Linh
-- **2 người tuyết** (snowmen) đáng yêu với khăn quàng đỏ
+
+**Nhân Vật & Kiến Trúc:**
+- **2 người tuyết** khổng lồ (cao 3m, 1/2 cây thông) với mũ đen, khăn đỏ, tay vẫy, miệng cười
+- **1 ông già Noel** vẫy tay chào với áo đỏ, râu trắng, mũ đỏ, túi quà có cây thông mini
+- **2 tuần lộc Rudolph** với mũi đỏ phát sáng, sừng đẹp, nhảy nhẹ nhàng
+- **1 ngôi nhà gỗ** với ống khói phun khói, cửa sổ sáng ấm, mái đỏ phủ tuyết
+- **2 hòm thư đỏ** với cờ và tuyết phủ trên
+- **1 bảng chỉ dẫn** North Pole với mũi tên vàng
+
+**Cảnh Quan:**
 - **6 cây thông nhỏ** xung quanh tạo bầu không khí rừng tuyết
 - **Hàng rào tuyết** phủ trắng hai bên
-- **2 đèn cột đường** phát sáng ấm áp
-- **5 sao băng** (shooting stars) lướt qua bầu trời
-- **3 đám mây tuyết** nhẹ nhàng trôi
-- **4 kẹo gậy** (candy canes) Giáng Sinh
-- **2 chuông vàng** đung đưa
-- **12 dấu chân** trên tuyết
+- **2 đèn cột đường** phát sáng ấm áp, nhấp nháy
+- **12 dấu chân** trên tuyết tạo đường đi
 - **12 đống tuyết** ngẫu nhiên
+
+**Hiệu Ứng Động:**
+- **5 sao băng** lướt qua bầu trời, fade in/out
+- **3 đám mây tuyết** di chuyển chậm
+- **4 kẹo gậy** candy canes đỏ trắng
+- **2 chuông vàng** đung đưa
+- **Khói từ ống khói** bay lên từ từ
 
 #### Hiệu Ứng Particles
 - **300 hạt tuyết** rơi tự nhiên với texture tùy chỉnh
