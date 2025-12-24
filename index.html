@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#001428">
+    <meta name="description" content="Thiệp Giáng Sinh 3D lấp lánh - Chúc mừng Giáng Sinh và Năm Mới 2026">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>Giáng Sinh Lung Linh 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        :root {
+            --primary-gold: #ffd700;
+            --secondary-gold: #ffefb0;
+            --ice-blue: #a8d8ea;
+            --deep-blue: #0a1931;
+            --midnight: #050b1a;
+            --snow-white: #ffffff;
+            --text-glow: #fff8e7;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            background: linear-gradient(180deg, #000814 0%, #001d3d 30%, #003566 60%, #000814 100%);
+            color: var(--text-glow);
+            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: pan-y pinch-zoom;
+        }
+
+        #scene { 
+            position: fixed; 
+            inset: 0;
+            width: 100%; 
+            height: 100%; 
+            z-index: 1; 
+        }
+
+        .magic-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.15), transparent 40%),
+                radial-gradient(circle at 80% 60%, rgba(168, 216, 234, 0.12), transparent 40%),
+                radial-gradient(circle at 50% 80%, rgba(255, 105, 180, 0.08), transparent 35%);
+            animation: magicPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes magicPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.05); }
+        }
+
+        .sparkle-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white, 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: sparkleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes sparkleFloat {
+            0%, 100% { transform: translateY(0) scale(0); opacity: 0; }
+            10% { opacity: 1; transform: translateY(-10px) scale(1); }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.8);
+            animation: shoot 2s ease-out forwards;
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-300px, 300px);
+                opacity: 0;
+            }
+        }
+
+        .grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.1"/></svg>');
+            opacity: 0.25;
+            mix-blend-mode: overlay;
+        }
+
+        .vignette {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.5) 100%);
+        }
+
+        .content-wrapper {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(16px, 4vw, 60px);
+            z-index: 6;
+            pointer-events: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .content-grid {
+            width: min(1200px, 100%);
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: clamp(24px, 5vw, 60px);
+            align-items: center;
+            max-height: 100%;
+        }
+
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeInLeft 1s ease-out;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .hero-section.hidden-on-interact {
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 18px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 239, 176, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: var(--secondary-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 0.75rem;
+            font-weight: 500;
+            width: fit-content;
+            backdrop-filter: blur(10px);
+            animation: badgeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes badgeGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+        }
+
+        .main-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 600;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffd700 0%, #fff8e7 50%, #ffd700 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.4));
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .sub-title {
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: var(--ice-blue);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .decorative-line {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+            margin: 10px 0;
+            animation: expandLine 1.5s ease-out;
+        }
+
+        @keyframes expandLine {
+            from { width: 0; }
+            to { width: 100px; }
+        }
+
+        .message-card {
+            padding: clamp(20px, 4vw, 36px);
+            border-radius: clamp(16px, 3vw, 24px);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 60px rgba(255, 215, 0, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            pointer-events: auto;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            animation: fadeInRight 1s ease-out;
+            position: relative;
+            overflow: hidden;
+            max-width: 100%;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .message-card.hidden-on-interact {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        .message-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                transparent 70%);
+            animation: cardShine 6s ease-in-out infinite;
+        }
+
+        @keyframes cardShine {
+            0%, 100% { transform: translate(-100%, -100%) rotate(45deg); }
+            50% { transform: translate(100%, 100%) rotate(45deg); }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message-card:hover:not(.hidden-on-interact) {
+            transform: translateY(-5px);
+            box-shadow:
+                0 12px 48px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 0 80px rgba(255, 215, 0, 0.2);
+            border-color: rgba(255, 215, 0, 0.4);
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            color: var(--secondary-gold);
+            line-height: 1.5;
+            margin-bottom: 16px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-text {
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            color: rgba(255, 248, 231, 0.85);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .signature {
+            margin-top: 24px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(1.4rem, 3vw, 1.9rem);
+            color: var(--primary-gold);
+            text-align: right;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hint-text {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            color: rgba(255, 248, 231, 0.5);
+            letter-spacing: 0.12em;
+            z-index: 8;
+            text-transform: uppercase;
+            animation: hintPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .controls-info {
+            position: fixed;
+            right: clamp(16px, 3vw, 24px);
+            top: clamp(16px, 3vw, 24px);
+            padding: 12px 18px;
+            background: linear-gradient(135deg, rgba(0, 8, 20, 0.8), rgba(10, 25, 49, 0.7));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            color: rgba(255, 248, 231, 0.8);
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            backdrop-filter: blur(12px);
+            z-index: 9;
+            line-height: 1.6;
+        }
+
+        /* Tablet và nhỏ hơn */
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: clamp(24px, 4vw, 40px);
+                max-width: 680px;
+                margin: 0 auto;
+            }
+
+            .hero-section {
+                text-align: center;
+                align-items: center;
+            }
+
+            .signature {
+                text-align: center;
+            }
+
+            .main-title {
+                font-size: clamp(3rem, 9vw, 4.5rem);
+            }
+        }
+
+        /* Tablet nhỏ */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: clamp(12px, 3vw, 24px);
+            }
+
+            .content-grid {
+                gap: 20px;
+                max-width: 100%;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+                padding: 6px 14px;
+            }
+
+            .main-title {
+                font-size: clamp(2.8rem, 10vw, 4rem);
+            }
+
+            .sub-title {
+                font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+            }
+
+            .card-title {
+                font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+                margin-bottom: 12px;
+            }
+
+            .card-text {
+                font-size: clamp(0.9rem, 2.2vw, 1rem);
+                line-height: 1.7;
+            }
+
+            .signature {
+                font-size: clamp(1.3rem, 3.5vw, 1.7rem);
+                margin-top: 20px;
+            }
+        }
+
+        /* Mobile lớn */
+        @media (max-width: 640px) {
+            .content-wrapper {
+                padding: 12px;
+                align-items: flex-start;
+                padding-top: 60px;
+            }
+
+            .content-grid {
+                gap: 16px;
+                width: 100%;
+            }
+
+            .hero-section {
+                gap: 12px;
+            }
+
+            .badge {
+                font-size: 0.65rem;
+                padding: 5px 12px;
+                letter-spacing: 0.15em;
+            }
+
+            .decorative-line {
+                width: 80px;
+            }
+
+            .main-title {
+                font-size: clamp(2.5rem, 11vw, 3.5rem);
+                line-height: 1.1;
+            }
+
+            .sub-title {
+                font-size: clamp(0.85rem, 2.5vw, 1rem);
+                letter-spacing: 0.12em;
+            }
+
+            .message-card {
+                padding: 16px 18px;
+                border-radius: 16px;
+            }
+
+            .card-title {
+                font-size: clamp(1.1rem, 4vw, 1.4rem);
+                margin-bottom: 10px;
+            }
+
+            .card-text {
+                font-size: clamp(0.88rem, 2.5vw, 0.95rem);
+                line-height: 1.65;
+                margin-bottom: 16px;
+            }
+
+            .signature {
+                font-size: clamp(1.2rem, 4vw, 1.5rem);
+                margin-top: 16px;
+            }
+
+            .message-card:hover {
+                transform: none;
+            }
+        }
+
+        /* Mobile nhỏ */
+        @media (max-width: 480px) {
+            .content-wrapper {
+                padding: 10px;
+                padding-top: 50px;
+            }
+
+            .hero-section {
+                gap: 10px;
+            }
+
+            .badge {
+                font-size: 0.6rem;
+                padding: 4px 10px;
+            }
+
+            .decorative-line {
+                width: 60px;
+                margin: 8px 0;
+            }
+
+            .main-title {
+                font-size: clamp(2.2rem, 12vw, 3rem);
+            }
+
+            .sub-title {
+                font-size: 0.8rem;
+            }
+
+            .message-card {
+                padding: 14px 16px;
+                border-radius: 14px;
+            }
+
+            .card-title {
+                font-size: 1.05rem;
+            }
+
+            .card-text {
+                font-size: 0.85rem;
+                line-height: 1.6;
+            }
+
+            .signature {
+                font-size: 1.15rem;
+            }
+        }
+
+        /* Màn hình rất nhỏ */
+        @media (max-width: 360px) {
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .sub-title {
+                font-size: 0.75rem;
+            }
+
+            .message-card {
+                padding: 12px 14px;
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            .card-text {
+                font-size: 0.82rem;
+            }
+        }
+
+        /* Màn hình thấp - landscape mobile */
+        @media (max-height: 700px) {
+            .content-wrapper {
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
+            .content-grid {
+                gap: 16px;
+            }
+            
+            .message-card {
+                padding: 16px 20px;
+            }
+
+            .hero-section {
+                gap: 8px;
+            }
+
+            .main-title {
+                font-size: clamp(2.5rem, 8vw, 3.5rem);
+            }
+
+            .card-text {
+                line-height: 1.6;
+            }
+        }
+
+        /* Landscape mode cho mobile */
+        @media (max-width: 968px) and (max-height: 500px) and (orientation: landscape) {
+            .content-wrapper {
+                padding: 10px 20px;
+                overflow-y: auto;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                max-width: 100%;
+            }
+
+            .hero-section {
+                text-align: left;
+                align-items: flex-start;
+            }
+
+            .signature {
+                text-align: right;
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .message-card {
+                padding: 14px 18px;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .card-text {
+                font-size: 0.85rem;
+                line-height: 1.5;
+            }
+        }
+
+        /* Tablet lớn - landscape */
+        @media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+            .content-grid {
+                grid-template-columns: 1fr 1.3fr;
+                gap: 30px;
+            }
+
+            .hero-section {
+                text-align: left;
+                align-items: flex-start;
+            }
+
+            .signature {
+                text-align: right;
+            }
+        }
+
+        /* Màn hình rất rộng */
+        @media (min-width: 1440px) {
+            .content-grid {
+                max-width: 1400px;
+                gap: 80px;
+            }
+
+            .message-card {
+                padding: 40px 44px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.2s; opacity: 0; }
+        .fade-in-delay-2 { animation-delay: 0.4s; opacity: 0; }
+        .fade-in-delay-3 { animation-delay: 0.6s; opacity: 0; }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading indicator */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #000814 0%, #001d3d 50%, #000814 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 215, 0, 0.2);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Smooth scrolling */
+        * {
+            scroll-behavior: smooth;
+        }
+
+        /* Touch feedback */
+        @media (hover: none) and (pointer: coarse) {
+            .message-card {
+                transition: all 0.2s ease;
+            }
+            
+            .message-card:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+  <body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+    </div>
+
+    <canvas id="scene"></canvas>
+    <div class="magic-overlay"></div>
+    <div class="sparkle-layer" id="sparkleLayer"></div>
+    <div class="vignette"></div>
+    <div class="grain"></div>
+    
+    <div class="content-wrapper">
+        <div class="content-grid">
+            <div class="hero-section">
+                <div class="badge">Mùa Giáng Sinh 2025</div>
+                <div class="decorative-line"></div>
+                <h1 class="main-title">Giáng Sinh<br>An Lành</h1>
+                <p class="sub-title">Chúc Mừng Năm Mới 2026</p>
+            </div>
+            
+            <div class="message-card">
+                <h2 class="card-title fade-in fade-in-delay-1">Niềm vui của mùa đông đang đến</h2>
+                <p class="card-text fade-in fade-in-delay-2">
+                    Trong ánh sáng lấp lánh của những ngọn đèn Giáng Sinh, ta gửi đến bạn
+                    những lời chúc tốt đẹp nhất. Mong rằng mùa đông này sẽ mang lại cho bạn
+                    nhiều khoảnh khắc ấm áp, tiếng cười rộn ràng và những kỷ niệm không bao giờ phai.
+                    <br><br>
+                    Hy vọng ánh sáng từ cây thông sẽ thắp sáng giấc mơ của bạn và mang đến
+                    nhiều may mắn, hạnh phúc trong năm mới sắp tới.
+                </p>
+                <div class="signature fade-in fade-in-delay-3">Gửi bạn</div>
+            </div>
+        </div>
+    </div>
+    
+
+    <script type="importmap">
+    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
+    <script type="module" src="main.js"></script>
+
+    <script>
+        // Hide loading overlay after page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }, 800);
+        });
+
+        // Performance optimization for mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isLowPerformance = isMobile || window.innerWidth < 768;
+
+        // Tao sparkles (reduce on mobile)
+        const sparkleLayer = document.getElementById('sparkleLayer');
+        const sparkleInterval = isLowPerformance ? 400 : 200;
+        
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = Math.random() * 100 + '%';
+            sparkle.style.top = '100%';
+            sparkle.style.animationDelay = Math.random() * 2 + 's';
+            sparkle.style.animationDuration = (3 + Math.random() * 2) + 's';
+            sparkleLayer.appendChild(sparkle);
+            
+            setTimeout(() => sparkle.remove(), 5000);
+        }
+        
+        setInterval(createSparkle, sparkleInterval);
+
+        // Tao shooting stars (reduce on mobile)
+        const shootingStarInterval = isLowPerformance ? 5000 : 3000;
+        
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.left = (Math.random() * 100) + '%';
+            star.style.top = (Math.random() * 50) + '%';
+            sparkleLayer.appendChild(star);
+            
+            setTimeout(() => star.remove(), 2000);
+        }
+        
+        setInterval(createShootingStar, shootingStarInterval);
+
+        // Prevent zoom on double tap (iOS)
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (event) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // Improve scrolling performance
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        // Hide/show content on background interaction
+        (function() {
+            const messageCard = document.querySelector('.message-card');
+            const heroSection = document.querySelector('.hero-section');
+            const canvas = document.getElementById('scene');
+            let hideTimer = null;
+            let showTimer = null;
+            let isInteracting = false;
+            let interactionStartTime = 0;
+
+            function hideContent() {
+                if (!isInteracting) {
+                    clearTimeout(showTimer);
+                    if (messageCard) messageCard.classList.add('hidden-on-interact');
+                    if (heroSection) heroSection.classList.add('hidden-on-interact');
+                    isInteracting = true;
+                }
+            }
+
+            function showContent() {
+                if (isInteracting) {
+                    clearTimeout(showTimer);
+                    showTimer = setTimeout(() => {
+                        if (messageCard) messageCard.classList.remove('hidden-on-interact');
+                        if (heroSection) heroSection.classList.remove('hidden-on-interact');
+                        isInteracting = false;
+                    }, 1200);
+                }
+            }
+
+            function onInteractionStart(e) {
+                // Chỉ ẩn nếu tương tác với canvas
+                if (e.target === canvas || e.target.tagName === 'CANVAS') {
+                    interactionStartTime = Date.now();
+                    // Delay nhỏ trước khi ẩn để tránh ẩn khi chỉ click nhẹ
+                    hideTimer = setTimeout(() => {
+                        hideContent();
+                    }, 150);
+                }
+            }
+
+            function onInteractionEnd() {
+                clearTimeout(hideTimer);
+                const interactionDuration = Date.now() - interactionStartTime;
+                
+                // Nếu tương tác quá ngắn (< 200ms), không ẩn
+                if (interactionDuration < 200) {
+                    clearTimeout(showTimer);
+                    if (messageCard) messageCard.classList.remove('hidden-on-interact');
+                    if (heroSection) heroSection.classList.remove('hidden-on-interact');
+                    isInteracting = false;
+                } else {
+                    showContent();
+                }
+            }
+
+            // Mouse events
+            canvas.addEventListener('mousedown', onInteractionStart);
+            canvas.addEventListener('mouseup', onInteractionEnd);
+            canvas.addEventListener('mouseleave', onInteractionEnd);
+            canvas.addEventListener('mousemove', (e) => {
+                if (e.buttons > 0 && isInteracting) {
+                    clearTimeout(hideTimer);
+                    hideContent();
+                }
+            });
+
+            // Touch events
+            canvas.addEventListener('touchstart', onInteractionStart, { passive: true });
+            canvas.addEventListener('touchend', onInteractionEnd);
+            canvas.addEventListener('touchcancel', onInteractionEnd);
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    clearTimeout(hideTimer);
+                    hideContent();
+                }
+            }, { passive: true });
+
+            // Wheel event (zoom)
+            let wheelTimer = null;
+            canvas.addEventListener('wheel', (e) => {
+                clearTimeout(wheelTimer);
+                hideContent();
+                wheelTimer = setTimeout(() => {
+                    showContent();
+                }, 300);
+            }, { passive: true });
+        })();
+    </script>
+</body>
+</html>
