@@ -703,53 +703,137 @@ function createSnowman(x, z) {
     snowman.add(head);
     
     // Mũi cà rốt
-    const noseMat = new THREE.MeshStandardMaterial({ color: 0xff6600 });
-    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12, 8), noseMat);
+    const noseMat = new THREE.MeshStandardMaterial({ 
+        color: 0xff6600,
+        emissive: 0xff3300,
+        emissiveIntensity: 0.2
+    });
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.15, 8), noseMat);
     nose.rotation.z = Math.PI / 2;
-    nose.position.set(0, 1.25, 0.15);
+    nose.position.set(0, 1.25, 0.16);
+    nose.castShadow = true;
     snowman.add(nose);
     
     // Mắt (than)
     const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMat);
-    leftEye.position.set(-0.08, 1.3, 0.15);
+    const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), eyeMat);
+    leftEye.position.set(-0.08, 1.3, 0.16);
     snowman.add(leftEye);
     
-    const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMat);
-    rightEye.position.set(0.08, 1.3, 0.15);
+    const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), eyeMat);
+    rightEye.position.set(0.08, 1.3, 0.16);
     snowman.add(rightEye);
+    
+    // Miệng cười
+    for (let i = 0; i < 5; i++) {
+        const mouthPart = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 6), eyeMat);
+        const angle = (i - 2) * 0.15;
+        mouthPart.position.set(angle * 0.3, 1.15 - Math.abs(angle) * 0.1, 0.16);
+        snowman.add(mouthPart);
+    }
     
     // Nút áo (than)
     for (let i = 0; i < 3; i++) {
-        const button = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), eyeMat);
-        button.position.set(0, 0.95 - i * 0.12, 0.22);
+        const button = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), eyeMat);
+        button.position.set(0, 0.95 - i * 0.15, 0.23);
         snowman.add(button);
     }
     
-    // Khăn quàng
+    // Khăn quàng đỏ
     const scarfMat = new THREE.MeshStandardMaterial({ 
         color: 0xff0000,
         roughness: 0.7,
-        metalness: 0.1
+        metalness: 0.1,
+        emissive: 0x880000,
+        emissiveIntensity: 0.1
     });
-    const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.03, 8, 16), scarfMat);
+    const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.04, 8, 16), scarfMat);
     scarf.rotation.x = Math.PI / 2;
     scarf.position.y = 1.05;
+    scarf.castShadow = true;
     snowman.add(scarf);
+    
+    // Đuôi khăn quàng
+    const scarfTail = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.35, 0.04),
+        scarfMat
+    );
+    scarfTail.position.set(0.15, 0.85, 0.15);
+    scarfTail.rotation.z = 0.3;
+    snowman.add(scarfTail);
+    
+    // Mũ đen
+    const hatMat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a,
+        roughness: 0.8,
+        metalness: 0.2
+    });
+    
+    // Vành mũ
+    const brim = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.22, 0.03, 16),
+        hatMat
+    );
+    brim.position.y = 1.45;
+    brim.castShadow = true;
+    snowman.add(brim);
+    
+    // Thân mũ
+    const hatBody = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.15, 0.15, 0.25, 16),
+        hatMat
+    );
+    hatBody.position.y = 1.595;
+    hatBody.castShadow = true;
+    snowman.add(hatBody);
+    
+    // Tay (cành cây)
+    const armMat = new THREE.MeshStandardMaterial({ 
+        color: 0x4a3020,
+        roughness: 0.9
+    });
+    
+    // Tay trái
+    const leftArm = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.015, 0.45, 6),
+        armMat
+    );
+    leftArm.position.set(-0.3, 0.85, 0);
+    leftArm.rotation.z = Math.PI / 3.5;
+    leftArm.rotation.x = 0.2;
+    leftArm.castShadow = true;
+    snowman.add(leftArm);
+    
+    // Tay phải - giơ lên chào
+    const rightArm = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.015, 0.45, 6),
+        armMat
+    );
+    rightArm.position.set(0.3, 0.85, 0);
+    rightArm.rotation.z = -Math.PI / 2.5;
+    rightArm.rotation.x = -0.3;
+    rightArm.castShadow = true;
+    snowman.add(rightArm);
     
     snowman.position.set(x, 0, z);
     return snowman;
 }
 
-// Thêm 2 người tuyết ở xa
+// Thêm 2 người tuyết lớn (cao bằng 1/2 cây thông)
+const snowmen = [];
 if (!isLowEndDevice) {
-    const snowman1 = createSnowman(-4, -3);
-    snowman1.scale.setScalar(0.8);
+    const snowman1 = createSnowman(-5, -2);
+    snowman1.scale.setScalar(2.2);
+    snowman1.rotation.y = 0.4;
+    snowman1.userData = { baseRotation: 0.4, swayPhase: 0 };
+    snowmen.push(snowman1);
     scene.add(snowman1);
     
-    const snowman2 = createSnowman(4.5, -2.5);
-    snowman2.scale.setScalar(0.7);
-    snowman2.rotation.y = -0.5;
+    const snowman2 = createSnowman(5, -2);
+    snowman2.scale.setScalar(2.0);
+    snowman2.rotation.y = -0.4;
+    snowman2.userData = { baseRotation: -0.4, swayPhase: Math.PI };
+    snowmen.push(snowman2);
     scene.add(snowman2);
 }
 
@@ -1370,6 +1454,12 @@ function animate() {
     }
     magicDust.geometry.attributes.position.needsUpdate = true;
     magicDustMat.opacity = 0.4 + Math.sin(t * 1.5) * 0.2;
+    
+    // Snowmen - đung đưa nhẹ
+    snowmen.forEach((snowman, index) => {
+        const sway = Math.sin(t * 0.8 + snowman.userData.swayPhase) * 0.03;
+        snowman.rotation.y = snowman.userData.baseRotation + sway;
+    });
 
     controls.update();
     renderer.render(scene, camera);
