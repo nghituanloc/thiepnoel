@@ -56,30 +56,35 @@ controls.update();
 function updateCameraForDevice() {
     const width = window.innerWidth;
     if (width < 640) {
-        // Mobile nhỏ
-        camera.position.set(0, 3.5, 11);
-        controls.minDistance = 8;
-        controls.maxDistance = 16;
-        controls.autoRotateSpeed = 0.25;
+        // Mobile nhỏ - xa hơn để thấy toàn cảnh
+        camera.position.set(0, 4, 13);
+        controls.minDistance = 10;
+        controls.maxDistance = 18;
+        controls.autoRotateSpeed = 0.22;
+        camera.fov = 50;
     } else if (width < 768) {
         // Mobile lớn
-        camera.position.set(0, 3.4, 10.5);
-        controls.minDistance = 7.5;
+        camera.position.set(0, 3.8, 12);
+        controls.minDistance = 9;
         controls.maxDistance = 17;
-        controls.autoRotateSpeed = 0.27;
+        controls.autoRotateSpeed = 0.25;
+        camera.fov = 48;
     } else if (width < 1024) {
         // Tablet
-        camera.position.set(0, 3.3, 10);
-        controls.minDistance = 7;
-        controls.maxDistance = 17.5;
-        controls.autoRotateSpeed = 0.28;
+        camera.position.set(0, 3.5, 10.5);
+        controls.minDistance = 8;
+        controls.maxDistance = 17;
+        controls.autoRotateSpeed = 0.27;
+        camera.fov = 46;
     } else {
         // Desktop
         camera.position.copy(initialCameraPos);
         controls.minDistance = 7;
         controls.maxDistance = 18;
         controls.autoRotateSpeed = 0.3;
+        camera.fov = 45;
     }
+    camera.updateProjectionMatrix();
     controls.update();
 }
 
@@ -821,21 +826,22 @@ function createSnowman(x, z) {
 
 // Thêm 2 người tuyết lớn (cao bằng 1/2 cây thông)
 const snowmen = [];
-if (!isLowEndDevice) {
-    const snowman1 = createSnowman(-5, -2);
-    snowman1.scale.setScalar(2.2);
-    snowman1.rotation.y = 0.4;
-    snowman1.userData = { baseRotation: 0.4, swayPhase: 0 };
-    snowmen.push(snowman1);
-    scene.add(snowman1);
-    
-    const snowman2 = createSnowman(5, -2);
-    snowman2.scale.setScalar(2.0);
-    snowman2.rotation.y = -0.4;
-    snowman2.userData = { baseRotation: -0.4, swayPhase: Math.PI };
-    snowmen.push(snowman2);
-    scene.add(snowman2);
-}
+const snowmanScale = isLowEndDevice ? 1.8 : 2.2;
+const snowmanDistance = isLowEndDevice ? -3.5 : -2;
+
+const snowman1 = createSnowman(-5, snowmanDistance);
+snowman1.scale.setScalar(snowmanScale);
+snowman1.rotation.y = 0.4;
+snowman1.userData = { baseRotation: 0.4, swayPhase: 0 };
+snowmen.push(snowman1);
+scene.add(snowman1);
+
+const snowman2 = createSnowman(5, snowmanDistance);
+snowman2.scale.setScalar(snowmanScale * 0.9);
+snowman2.rotation.y = -0.4;
+snowman2.userData = { baseRotation: -0.4, swayPhase: Math.PI };
+snowmen.push(snowman2);
+scene.add(snowman2);
 
 // Ngôi nhà Giáng Sinh
 function createHouse(x, z) {
@@ -1009,11 +1015,12 @@ function createHouse(x, z) {
     return house;
 }
 
-// Thêm ngôi nhà
+// Thêm ngôi nhà (chỉ desktop)
 const houses = [];
 if (!isLowEndDevice) {
     const house1 = createHouse(-7, -6);
     house1.rotation.y = 0.3;
+    house1.scale.setScalar(0.9);
     houses.push(house1);
     scene.add(house1);
 }
@@ -1247,15 +1254,17 @@ function createSanta(x, z) {
     return santa;
 }
 
-// Thêm ông già Noel
+// Thêm ông già Noel (hiện cả mobile)
 const santas = [];
-if (!isLowEndDevice) {
-    const santa1 = createSanta(7, -5);
-    santa1.rotation.y = -Math.PI / 6;
-    santa1.userData.baseRotation = -Math.PI / 6;
-    santas.push(santa1);
-    scene.add(santa1);
-}
+const santaScale = isLowEndDevice ? 1.3 : 1.6;
+const santaDistance = isLowEndDevice ? -4 : -5;
+
+const santa1 = createSanta(7, santaDistance);
+santa1.rotation.y = -Math.PI / 6;
+santa1.scale.setScalar(santaScale);
+santa1.userData.baseRotation = -Math.PI / 6;
+santas.push(santa1);
+scene.add(santa1);
 
 // Tuần lộc (Reindeer)
 function createReindeer(x, z) {
@@ -1416,21 +1425,22 @@ function createReindeer(x, z) {
     return reindeer;
 }
 
-// Thêm tuần lộc
+// Thêm tuần lộc (hiện cả mobile)
 const reindeers = [];
-if (!isLowEndDevice) {
-    const reindeer1 = createReindeer(6, -3);
-    reindeer1.rotation.y = -Math.PI / 4;
-    reindeer1.scale.setScalar(1.5);
-    reindeers.push(reindeer1);
-    scene.add(reindeer1);
-    
-    const reindeer2 = createReindeer(-6, -4);
-    reindeer2.rotation.y = Math.PI / 3;
-    reindeer2.scale.setScalar(1.3);
-    reindeers.push(reindeer2);
-    scene.add(reindeer2);
-}
+const reindeerScale = isLowEndDevice ? 1.0 : 1.5;
+const reindeerDistance = isLowEndDevice ? -3.5 : -3;
+
+const reindeer1 = createReindeer(6, reindeerDistance);
+reindeer1.rotation.y = -Math.PI / 4;
+reindeer1.scale.setScalar(reindeerScale);
+reindeers.push(reindeer1);
+scene.add(reindeer1);
+
+const reindeer2 = createReindeer(-6, isLowEndDevice ? -4.5 : -4);
+reindeer2.rotation.y = Math.PI / 3;
+reindeer2.scale.setScalar(reindeerScale * 0.87);
+reindeers.push(reindeer2);
+scene.add(reindeer2);
 
 // Hòm thư Giáng Sinh (Mailbox)
 function createMailbox(x, z) {
@@ -1499,13 +1509,15 @@ function createMailbox(x, z) {
     return mailbox;
 }
 
-// Thêm hòm thư
+// Thêm hòm thư (mobile: 0, desktop: 2)
 if (!isLowEndDevice) {
     const mailbox1 = createMailbox(-8, -3);
+    mailbox1.scale.setScalar(0.9);
     scene.add(mailbox1);
     
     const mailbox2 = createMailbox(8, -3.5);
     mailbox2.rotation.y = Math.PI;
+    mailbox2.scale.setScalar(0.9);
     scene.add(mailbox2);
 }
 
@@ -1565,11 +1577,10 @@ function createSign(x, z) {
     return sign;
 }
 
-// Thêm bảng chỉ dẫn
-if (!isLowEndDevice) {
-    const sign1 = createSign(0, -5);
-    scene.add(sign1);
-}
+// Thêm bảng chỉ dẫn (hiện cả mobile)
+const sign1 = createSign(0, isLowEndDevice ? -4.5 : -5);
+sign1.scale.setScalar(isLowEndDevice ? 0.8 : 1);
+scene.add(sign1);
 
 // Cây thông nhỏ xung quanh
 function createSmallTree(x, z, scale = 1) {
@@ -1598,15 +1609,22 @@ function createSmallTree(x, z, scale = 1) {
     return tree;
 }
 
-// Thêm rừng cây nhỏ xung quanh
-const smallTreePositions = [
-    { x: -5, z: 2, s: 0.6 },
-    { x: -6, z: -1, s: 0.8 },
-    { x: 5.5, z: 1.5, s: 0.7 },
-    { x: 6, z: -2, s: 0.9 },
-    { x: -3, z: 4, s: 0.5 },
-    { x: 3.5, z: 4, s: 0.6 }
-];
+// Thêm rừng cây nhỏ xung quanh (mobile: 4, desktop: 6)
+const smallTreePositions = isLowEndDevice 
+    ? [
+        { x: -5, z: 2, s: 0.6 },
+        { x: 5.5, z: 1.5, s: 0.7 },
+        { x: -3, z: 4, s: 0.5 },
+        { x: 3.5, z: 4, s: 0.6 }
+      ]
+    : [
+        { x: -5, z: 2, s: 0.6 },
+        { x: -6, z: -1, s: 0.8 },
+        { x: 5.5, z: 1.5, s: 0.7 },
+        { x: 6, z: -2, s: 0.9 },
+        { x: -3, z: 4, s: 0.5 },
+        { x: 3.5, z: 4, s: 0.6 }
+      ];
 
 smallTreePositions.forEach(pos => {
     const tree = createSmallTree(pos.x, pos.z, pos.s);
@@ -1660,12 +1678,15 @@ function createFence(startX, startZ, length, rotation = 0) {
     return fence;
 }
 
-// Thêm hàng rào
-const fence1 = createFence(-7, -4, 4, 0);
+// Thêm hàng rào (mobile: 1, desktop: 2)
+const fence1 = createFence(-7, -4, isLowEndDevice ? 3 : 4, 0);
+fence1.scale.setScalar(isLowEndDevice ? 0.8 : 1);
 scene.add(fence1);
 
-const fence2 = createFence(3.5, -4, 4, 0);
-scene.add(fence2);
+if (!isLowEndDevice) {
+    const fence2 = createFence(3.5, -4, 4, 0);
+    scene.add(fence2);
+}
 
 // Shooting stars (Sao băng)
 const shootingStars = [];
@@ -1807,13 +1828,14 @@ function createLampPost(x, z) {
     return lamp;
 }
 
-// Thêm đèn cột
+// Thêm đèn cột (mobile: 1, desktop: 2)
 const lampPosts = [];
+const lamp1 = createLampPost(-3.5, -3.5);
+lamp1.scale.setScalar(isLowEndDevice ? 0.8 : 1);
+lampPosts.push(lamp1);
+scene.add(lamp1);
+
 if (!isLowEndDevice) {
-    const lamp1 = createLampPost(-3.5, -3.5);
-    lampPosts.push(lamp1);
-    scene.add(lamp1);
-    
     const lamp2 = createLampPost(3.5, -3.5);
     lampPosts.push(lamp2);
     scene.add(lamp2);
@@ -1835,15 +1857,15 @@ function createSnowPile(x, z, size = 1) {
     return pile;
 }
 
-// Thêm các đống tuyết ngẫu nhiên
-const snowPileCount = isLowEndDevice ? 5 : 12;
+// Thêm các đống tuyết ngẫu nhiên (mobile: 6, desktop: 10)
+const snowPileCount = isLowEndDevice ? 6 : 10;
 for (let i = 0; i < snowPileCount; i++) {
     const angle = (i / snowPileCount) * Math.PI * 2;
     const radius = 6 + Math.random() * 2;
     const pile = createSnowPile(
         Math.cos(angle) * radius,
         Math.sin(angle) * radius,
-        0.8 + Math.random() * 0.4
+        (isLowEndDevice ? 0.7 : 0.8) + Math.random() * 0.4
     );
     scene.add(pile);
 }
@@ -1879,20 +1901,16 @@ function createCandyCane(x, z) {
     return candyCane;
 }
 
-// Thêm kẹo gậy
-if (!isLowEndDevice) {
-    const positions = [
-        { x: -2.5, z: 3 },
-        { x: 2.5, z: 3 },
-        { x: -4.5, z: 0 },
-        { x: 4.5, z: 0.5 }
-    ];
-    
-    positions.forEach(pos => {
-        const candy = createCandyCane(pos.x, pos.z);
-        scene.add(candy);
-    });
-}
+// Thêm kẹo gậy (mobile: 2, desktop: 4)
+const candyPositions = isLowEndDevice 
+    ? [{ x: -2.5, z: 3 }, { x: 2.5, z: 3 }]
+    : [{ x: -2.5, z: 3 }, { x: 2.5, z: 3 }, { x: -4.5, z: 0 }, { x: 4.5, z: 0.5 }];
+
+candyPositions.forEach(pos => {
+    const candy = createCandyCane(pos.x, pos.z);
+    candy.scale.setScalar(isLowEndDevice ? 0.8 : 1);
+    scene.add(candy);
+});
 
 // Chuông Giáng Sinh (Bells)
 function createBell(x, y, z) {
@@ -1933,14 +1951,16 @@ function createBell(x, y, z) {
     return bell;
 }
 
-// Thêm chuông treo
+// Thêm chuông treo (mobile: 1, desktop: 2)
 const bells = [];
+const bell1 = createBell(0, 1.5, 2.5);
+bell1.scale.setScalar(isLowEndDevice ? 1.2 : 1.5);
+bells.push(bell1);
+scene.add(bell1);
+
 if (!isLowEndDevice) {
-    const bell1 = createBell(-1.5, 1.5, 2.5);
-    bells.push(bell1);
-    scene.add(bell1);
-    
-    const bell2 = createBell(1.5, 1.5, 2.5);
+    const bell2 = createBell(1.8, 1.5, 2.5);
+    bell2.scale.setScalar(1.3);
     bells.push(bell2);
     scene.add(bell2);
 }
@@ -1975,8 +1995,8 @@ function createFootprint(x, z, rotation) {
     return footprint;
 }
 
-// Tạo đường đi bằng dấu chân
-const footprintCount = isLowEndDevice ? 6 : 12;
+// Tạo đường đi bằng dấu chân (mobile: 4, desktop: 10)
+const footprintCount = isLowEndDevice ? 4 : 10;
 for (let i = 0; i < footprintCount; i++) {
     const t = i / footprintCount;
     const angle = -Math.PI / 4;
@@ -1987,6 +2007,7 @@ for (let i = 0; i < footprintCount; i++) {
     const side = i % 2 === 0 ? 0.1 : -0.1;
     
     const footprint = createFootprint(x + side, z, angle + Math.PI / 2);
+    footprint.scale.setScalar(isLowEndDevice ? 0.8 : 1);
     scene.add(footprint);
 }
 
