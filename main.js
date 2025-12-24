@@ -173,14 +173,14 @@ function createRealisticTree() {
         return c;
     };
     
-    // Thân cây chi tiết hơn với texture
+    // Thân cây chi tiết hơn
     const trunkGeo = new THREE.CylinderGeometry(0.12, 0.25, 1.6, 16);
     const trunkMat = new THREE.MeshStandardMaterial({ 
         color: 0x5a4030, 
-        roughness: 0.95,
-        metalness: 0.02,
+        roughness: 0.9,
+        metalness: 0.05,
         emissive: 0x2a1810,
-        emissiveIntensity: 0.12
+        emissiveIntensity: 0.1
     });
     const trunk = new THREE.Mesh(trunkGeo, trunkMat);
     trunk.position.y = 0.8;
@@ -188,29 +188,21 @@ function createRealisticTree() {
     trunk.receiveShadow = true;
     tree.add(trunk);
     
-    // Vật liệu lá với nhiều biến thể màu sắc
+    // Vật liệu lá tươi và lá đậm với emissive
     const needleMatLight = new THREE.MeshStandardMaterial({
-        color: 0x3d9555,
-        roughness: 0.7,
-        metalness: 0.18,
-        emissive: 0x1d4528,
-        emissiveIntensity: 0.18,
+        color: 0x3d8a52,
+        roughness: 0.75,
+        metalness: 0.15,
+        emissive: 0x1a3a25,
+        emissiveIntensity: 0.15,
         side: THREE.DoubleSide
     });
     const needleMatDark = new THREE.MeshStandardMaterial({
-        color: 0x2d6840,
-        roughness: 0.82,
-        metalness: 0.1,
-        emissive: 0x0f2818,
-        emissiveIntensity: 0.12,
-        side: THREE.DoubleSide
-    });
-    const needleMatMid = new THREE.MeshStandardMaterial({
-        color: 0x358047,
-        roughness: 0.76,
-        metalness: 0.14,
-        emissive: 0x163620,
-        emissiveIntensity: 0.15,
+        color: 0x2d5c3a,
+        roughness: 0.85,
+        metalness: 0.08,
+        emissive: 0x0f2418,
+        emissiveIntensity: 0.1,
         side: THREE.DoubleSide
     });
     
@@ -220,14 +212,9 @@ function createRealisticTree() {
         metalness: 0.04
     });
     
-    // Tối ưu số lượng kim lá theo thiết bị
-    const needleDensity = isLowEndDevice ? 22 : 35;
-    
-    function createBranch(length, thickness, tone, layerIndex) {
+    function createBranch(length, thickness, tone) {
         const branch = new THREE.Group();
-        
-        // Cành chính với chi tiết hơn
-        const stemGeo = new THREE.CylinderGeometry(thickness * 0.3, thickness, length, 6);
+        const stemGeo = new THREE.CylinderGeometry(thickness * 0.35, thickness, length, 8);
         const stemMat = branchMatBase.clone();
         stemMat.color.copy(tintColor(0x1f3a28, tone * 0.25));
         const stem = new THREE.Mesh(stemGeo, stemMat);
@@ -236,125 +223,65 @@ function createRealisticTree() {
         stem.castShadow = true;
         branch.add(stem);
         
-        // Tăng mật độ kim lá
-        const needleCount = Math.floor(length * needleDensity);
-        
+        const needleCount = Math.floor(length * 20);
         for (let i = 0; i < needleCount; i++) {
             const t = i / needleCount;
             const x = t * length;
             
-            // Biến thể chiều dài kim lá
-            const needleLen = 0.18 + Math.random() * 0.12;
-            const needleGeo = new THREE.ConeGeometry(0.02, needleLen, 4);
-            
-            // Chọn màu ngẫu nhiên từ 3 loại
-            const colorRand = Math.random();
-            let mat;
-            if (colorRand < 0.35) {
-                mat = needleMatDark.clone();
-            } else if (colorRand < 0.7) {
-                mat = needleMatMid.clone();
-            } else {
-                mat = needleMatLight.clone();
-            }
-            
-            // Thêm hiệu ứng sương giá
-            const frost = tone * 0.3 + (1 - t) * 0.18;
-            mat.color.lerp(new THREE.Color(0xe0f5e8), frost * 0.4);
+            const needleLen = 0.15 + Math.random() * 0.1;
+            const needleGeo = new THREE.ConeGeometry(0.018, needleLen, 5);
+            const mat = Math.random() > 0.4 ? needleMatDark.clone() : needleMatLight.clone();
+            const frost = tone * 0.25 + (1 - t) * 0.15;
+            mat.color.lerp(new THREE.Color(0xd8f0dd), frost * 0.35);
             
             const needle = new THREE.Mesh(needleGeo, mat);
             needle.position.x = x;
             
-            // Phân bố kim lá xung quanh cành dày đặc hơn
             const angle = Math.random() * Math.PI * 2;
-            const spread = 0.05 + t * 0.04;
+            const spread = 0.04 + t * 0.03;
             needle.position.y = Math.cos(angle) * spread;
             needle.position.z = Math.sin(angle) * spread;
             
-            // Góc nghiêng tự nhiên hơn
-            needle.rotation.z = Math.PI / 2 + (Math.random() - 0.5) * 0.6;
-            needle.rotation.y = angle + (Math.random() - 0.5) * 0.3;
-            needle.rotation.x = (Math.random() - 0.5) * 0.2;
+            needle.rotation.z = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+            needle.rotation.y = angle;
             
             branch.add(needle);
-        }
-        
-        // Thêm sub-branches (cành phụ) cho tầng dưới
-        if (layerIndex < 6 && !isLowEndDevice) {
-            const subBranchCount = Math.floor(2 + Math.random() * 2);
-            for (let s = 0; s < subBranchCount; s++) {
-                const subLength = length * (0.3 + Math.random() * 0.2);
-                const subPos = 0.3 + Math.random() * 0.4;
-                
-                const subBranch = new THREE.Group();
-                const subStemGeo = new THREE.CylinderGeometry(thickness * 0.2, thickness * 0.4, subLength, 4);
-                const subStem = new THREE.Mesh(subStemGeo, stemMat.clone());
-                subStem.rotation.z = Math.PI / 2;
-                subStem.position.x = subLength / 2;
-                subBranch.add(subStem);
-                
-                // Kim lá cho cành phụ
-                const subNeedleCount = Math.floor(subLength * (needleDensity * 0.7));
-                for (let n = 0; n < subNeedleCount; n++) {
-                    const nt = n / subNeedleCount;
-                    const nx = nt * subLength;
-                    const nLen = 0.15 + Math.random() * 0.08;
-                    const nGeo = new THREE.ConeGeometry(0.018, nLen, 4);
-                    const nMat = (Math.random() < 0.5 ? needleMatDark : needleMatMid).clone();
-                    const nNeedle = new THREE.Mesh(nGeo, nMat);
-                    nNeedle.position.x = nx;
-                    const nAngle = Math.random() * Math.PI * 2;
-                    const nSpread = 0.03 + nt * 0.02;
-                    nNeedle.position.y = Math.cos(nAngle) * nSpread;
-                    nNeedle.position.z = Math.sin(nAngle) * nSpread;
-                    nNeedle.rotation.z = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
-                    nNeedle.rotation.y = nAngle;
-                    subBranch.add(nNeedle);
-                }
-                
-                subBranch.position.x = length * subPos;
-                subBranch.rotation.y = (Math.random() - 0.5) * Math.PI;
-                subBranch.rotation.z = -0.3 - Math.random() * 0.3;
-                branch.add(subBranch);
-            }
         }
         
         return branch;
     }
     
-    // Tăng số tầng và cành
     const treeHeight = 4.8;
-    const layerCount = isLowEndDevice ? 14 : 18;
+    const layerCount = 12;
     
     for (let layer = 0; layer < layerCount; layer++) {
         const t = layer / layerCount;
         const y = 1.2 + t * (treeHeight - 1.2);
-        const layerRadius = 1.7 * (1 - t * 0.86);
-        const branchCount = Math.floor(8 - t * 2.5);
-        const branchLength = layerRadius * (0.88 + Math.random() * 0.2);
-        const tone = 0.5 + (1 - t) * 0.35;
+        const layerRadius = 1.6 * (1 - t * 0.85);
+        const branchCount = Math.floor(7 - t * 2);
+        const branchLength = layerRadius * (0.9 + Math.random() * 0.15);
+        const tone = 0.45 + (1 - t) * 0.3;
         
         for (let b = 0; b < branchCount; b++) {
-            const angle = (b / branchCount) * Math.PI * 2 + layer * 0.45;
-            const branch = createBranch(branchLength, 0.032 - t * 0.014, tone, layer);
+            const angle = (b / branchCount) * Math.PI * 2 + layer * 0.5;
+            const branch = createBranch(branchLength, 0.03 - t * 0.012, tone);
             
             branch.position.y = y;
             branch.rotation.y = angle;
-            branch.rotation.z = 0.22 + (1 - t) * 0.38;
+            branch.rotation.z = 0.25 + (1 - t) * 0.35;
             
             tree.add(branch);
         }
     }
     
-    // Đỉnh cây đẹp hơn với nhiều chi tiết
-    const topHeight = 0.6;
-    const topGeo = new THREE.ConeGeometry(0.12, topHeight, 8);
+    // Đỉnh cây đẹp hơn
+    const topGeo = new THREE.ConeGeometry(0.1, 0.5, 10);
     const topMat = needleMatLight.clone();
-    topMat.color.lerp(new THREE.Color(0xe8f7ec), 0.5);
+    topMat.color.lerp(new THREE.Color(0xe0f5e5), 0.4);
     topMat.emissive = new THREE.Color(0x2d6a3e);
-    topMat.emissiveIntensity = 0.2;
+    topMat.emissiveIntensity = 0.15;
     const top = new THREE.Mesh(topGeo, topMat);
-    top.position.y = treeHeight + topHeight / 2 + 0.2;
+    top.position.y = treeHeight + 0.55;
     top.castShadow = true;
     tree.add(top);
     
@@ -799,6 +726,539 @@ magicCircle.rotation.x = -Math.PI / 2;
 magicCircle.position.y = 0.05;
 scene.add(magicCircle);
 
+// ===== THÊM CÁC THÀNH PHẦN GIÁNG SINH BACKGROUND =====
+
+// Người tuyết (Snowman)
+function createSnowman(x, z) {
+    const snowman = new THREE.Group();
+    
+    // Thân - 3 quả cầu tuyết
+    const snowMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.8,
+        metalness: 0.1,
+        emissive: 0xe0f0ff,
+        emissiveIntensity: 0.1
+    });
+    
+    // Quả dưới
+    const bottom = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), snowMat);
+    bottom.position.y = 0.35;
+    bottom.castShadow = true;
+    snowman.add(bottom);
+    
+    // Quả giữa
+    const middle = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), snowMat);
+    middle.position.y = 0.85;
+    middle.castShadow = true;
+    snowman.add(middle);
+    
+    // Quả đầu
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), snowMat);
+    head.position.y = 1.25;
+    head.castShadow = true;
+    snowman.add(head);
+    
+    // Mũi cà rốt
+    const noseMat = new THREE.MeshStandardMaterial({ color: 0xff6600 });
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12, 8), noseMat);
+    nose.rotation.z = Math.PI / 2;
+    nose.position.set(0, 1.25, 0.15);
+    snowman.add(nose);
+    
+    // Mắt (than)
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMat);
+    leftEye.position.set(-0.08, 1.3, 0.15);
+    snowman.add(leftEye);
+    
+    const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), eyeMat);
+    rightEye.position.set(0.08, 1.3, 0.15);
+    snowman.add(rightEye);
+    
+    // Nút áo (than)
+    for (let i = 0; i < 3; i++) {
+        const button = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), eyeMat);
+        button.position.set(0, 0.95 - i * 0.12, 0.22);
+        snowman.add(button);
+    }
+    
+    // Khăn quàng
+    const scarfMat = new THREE.MeshStandardMaterial({ 
+        color: 0xff0000,
+        roughness: 0.7,
+        metalness: 0.1
+    });
+    const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.03, 8, 16), scarfMat);
+    scarf.rotation.x = Math.PI / 2;
+    scarf.position.y = 1.05;
+    snowman.add(scarf);
+    
+    snowman.position.set(x, 0, z);
+    return snowman;
+}
+
+// Thêm 2 người tuyết ở xa
+if (!isLowEndDevice) {
+    const snowman1 = createSnowman(-4, -3);
+    snowman1.scale.setScalar(0.8);
+    scene.add(snowman1);
+    
+    const snowman2 = createSnowman(4.5, -2.5);
+    snowman2.scale.setScalar(0.7);
+    snowman2.rotation.y = -0.5;
+    scene.add(snowman2);
+}
+
+// Cây thông nhỏ xung quanh
+function createSmallTree(x, z, scale = 1) {
+    const tree = new THREE.Group();
+    
+    const treeMat = new THREE.MeshStandardMaterial({
+        color: 0x2d5c3a,
+        roughness: 0.9,
+        emissive: 0x1a3025,
+        emissiveIntensity: 0.1
+    });
+    
+    // 3 tầng lá
+    for (let i = 0; i < 3; i++) {
+        const cone = new THREE.Mesh(
+            new THREE.ConeGeometry(0.4 - i * 0.1, 0.6, 8),
+            treeMat
+        );
+        cone.position.y = 0.3 + i * 0.35;
+        cone.castShadow = true;
+        tree.add(cone);
+    }
+    
+    tree.position.set(x, 0, z);
+    tree.scale.setScalar(scale);
+    return tree;
+}
+
+// Thêm rừng cây nhỏ xung quanh
+const smallTreePositions = [
+    { x: -5, z: 2, s: 0.6 },
+    { x: -6, z: -1, s: 0.8 },
+    { x: 5.5, z: 1.5, s: 0.7 },
+    { x: 6, z: -2, s: 0.9 },
+    { x: -3, z: 4, s: 0.5 },
+    { x: 3.5, z: 4, s: 0.6 }
+];
+
+smallTreePositions.forEach(pos => {
+    const tree = createSmallTree(pos.x, pos.z, pos.s);
+    scene.add(tree);
+});
+
+// Hàng rào tuyết
+function createFence(startX, startZ, length, rotation = 0) {
+    const fence = new THREE.Group();
+    const fenceMat = new THREE.MeshStandardMaterial({
+        color: 0x8b4513,
+        roughness: 0.9
+    });
+    const snowCapMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.8
+    });
+    
+    const posts = Math.floor(length / 0.5);
+    for (let i = 0; i < posts; i++) {
+        // Cột dọc
+        const post = new THREE.Mesh(
+            new THREE.BoxGeometry(0.06, 0.4, 0.06),
+            fenceMat
+        );
+        post.position.set(i * 0.5, 0.2, 0);
+        post.castShadow = true;
+        fence.add(post);
+        
+        // Tuyết trên cột
+        const snowCap = new THREE.Mesh(
+            new THREE.BoxGeometry(0.08, 0.04, 0.08),
+            snowCapMat
+        );
+        snowCap.position.set(i * 0.5, 0.42, 0);
+        fence.add(snowCap);
+        
+        // Thanh ngang
+        if (i < posts - 1) {
+            const rail = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.04, 0.04),
+                fenceMat
+            );
+            rail.position.set(i * 0.5 + 0.25, 0.25, 0);
+            fence.add(rail);
+        }
+    }
+    
+    fence.position.set(startX, 0, startZ);
+    fence.rotation.y = rotation;
+    return fence;
+}
+
+// Thêm hàng rào
+const fence1 = createFence(-7, -4, 4, 0);
+scene.add(fence1);
+
+const fence2 = createFence(3.5, -4, 4, 0);
+scene.add(fence2);
+
+// Shooting stars (Sao băng)
+const shootingStars = [];
+const shootingStarCount = isLowEndDevice ? 2 : 5;
+
+function createShootingStar() {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(20 * 3);
+    
+    for (let i = 0; i < 20; i++) {
+        const t = i / 20;
+        positions[i * 3] = t * 2;
+        positions[i * 3 + 1] = 0;
+        positions[i * 3 + 2] = 0;
+    }
+    
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    const material = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.1,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+    });
+    
+    const star = new THREE.Points(geometry, material);
+    star.position.set(
+        (Math.random() - 0.5) * 20,
+        10 + Math.random() * 10,
+        (Math.random() - 0.5) * 20
+    );
+    star.rotation.z = Math.random() * Math.PI;
+    
+    star.userData = {
+        velocity: new THREE.Vector3(
+            -0.1 - Math.random() * 0.1,
+            -0.05 - Math.random() * 0.05,
+            0
+        ),
+        life: 0,
+        maxLife: 3 + Math.random() * 2
+    };
+    
+    return star;
+}
+
+for (let i = 0; i < shootingStarCount; i++) {
+    const star = createShootingStar();
+    star.userData.life = Math.random() * star.userData.maxLife;
+    shootingStars.push(star);
+    scene.add(star);
+}
+
+// Đám mây tuyết nhẹ
+const cloudCount = isLowEndDevice ? 0 : 3;
+const clouds = [];
+
+function createCloud(x, y, z) {
+    const cloud = new THREE.Group();
+    const cloudMat = new THREE.MeshStandardMaterial({
+        color: 0xe0e8f0,
+        transparent: true,
+        opacity: 0.3,
+        roughness: 1
+    });
+    
+    for (let i = 0; i < 5; i++) {
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.3 + Math.random() * 0.2, 8, 8),
+            cloudMat
+        );
+        sphere.position.set(
+            (Math.random() - 0.5) * 1.5,
+            (Math.random() - 0.5) * 0.3,
+            (Math.random() - 0.5) * 0.5
+        );
+        cloud.add(sphere);
+    }
+    
+    cloud.position.set(x, y, z);
+    cloud.userData = {
+        speed: 0.01 + Math.random() * 0.01,
+        startX: x
+    };
+    return cloud;
+}
+
+for (let i = 0; i < cloudCount; i++) {
+    const cloud = createCloud(
+        (Math.random() - 0.5) * 20,
+        8 + Math.random() * 3,
+        -10 - Math.random() * 5
+    );
+    clouds.push(cloud);
+    scene.add(cloud);
+}
+
+// Đèn cột đường (Lamp posts)
+function createLampPost(x, z) {
+    const lamp = new THREE.Group();
+    
+    // Cột
+    const postMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c });
+    const post = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.04, 0.06, 1.8, 8),
+        postMat
+    );
+    post.position.y = 0.9;
+    post.castShadow = true;
+    lamp.add(post);
+    
+    // Đèn
+    const lightGeo = new THREE.SphereGeometry(0.15, 12, 12);
+    const lightMat = new THREE.MeshStandardMaterial({
+        color: 0xfff4d0,
+        emissive: 0xfff4d0,
+        emissiveIntensity: 1.5
+    });
+    const bulb = new THREE.Mesh(lightGeo, lightMat);
+    bulb.position.y = 1.8;
+    lamp.add(bulb);
+    
+    // Point light
+    const light = new THREE.PointLight(0xfff4d0, 0.8, 4);
+    light.position.y = 1.8;
+    lamp.add(light);
+    
+    // Tuyết trên đèn
+    const snowTop = new THREE.Mesh(
+        new THREE.SphereGeometry(0.18, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
+    );
+    snowTop.position.y = 1.95;
+    lamp.add(snowTop);
+    
+    lamp.position.set(x, 0, z);
+    lamp.userData = { light: light, baseLightIntensity: 0.8 };
+    return lamp;
+}
+
+// Thêm đèn cột
+const lampPosts = [];
+if (!isLowEndDevice) {
+    const lamp1 = createLampPost(-3.5, -3.5);
+    lampPosts.push(lamp1);
+    scene.add(lamp1);
+    
+    const lamp2 = createLampPost(3.5, -3.5);
+    lampPosts.push(lamp2);
+    scene.add(lamp2);
+}
+
+// Tuyết trên mặt đất (snow piles)
+function createSnowPile(x, z, size = 1) {
+    const pile = new THREE.Mesh(
+        new THREE.SphereGeometry(0.3 * size, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.9,
+            metalness: 0.05
+        })
+    );
+    pile.position.set(x, 0, z);
+    pile.scale.y = 0.5;
+    pile.receiveShadow = true;
+    return pile;
+}
+
+// Thêm các đống tuyết ngẫu nhiên
+const snowPileCount = isLowEndDevice ? 5 : 12;
+for (let i = 0; i < snowPileCount; i++) {
+    const angle = (i / snowPileCount) * Math.PI * 2;
+    const radius = 6 + Math.random() * 2;
+    const pile = createSnowPile(
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        0.8 + Math.random() * 0.4
+    );
+    scene.add(pile);
+}
+
+// Kẹo gậy Giáng Sinh (Candy Canes)
+function createCandyCane(x, z) {
+    const candyCane = new THREE.Group();
+    
+    // Tạo đường curve cho kẹo gậy
+    const curve = new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0.3, 0),
+        new THREE.Vector3(0.15, 0.5, 0)
+    );
+    
+    const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.02, 8, false);
+    
+    // Tạo texture sọc đỏ trắng
+    const candyMat = new THREE.MeshStandardMaterial({
+        color: 0xff0000,
+        roughness: 0.3,
+        metalness: 0.5,
+        emissive: 0xff0000,
+        emissiveIntensity: 0.2
+    });
+    
+    const candy = new THREE.Mesh(tubeGeo, candyMat);
+    candy.castShadow = true;
+    candyCane.add(candy);
+    
+    candyCane.position.set(x, 0, z);
+    candyCane.rotation.y = Math.random() * Math.PI * 2;
+    return candyCane;
+}
+
+// Thêm kẹo gậy
+if (!isLowEndDevice) {
+    const positions = [
+        { x: -2.5, z: 3 },
+        { x: 2.5, z: 3 },
+        { x: -4.5, z: 0 },
+        { x: 4.5, z: 0.5 }
+    ];
+    
+    positions.forEach(pos => {
+        const candy = createCandyCane(pos.x, pos.z);
+        scene.add(candy);
+    });
+}
+
+// Chuông Giáng Sinh (Bells)
+function createBell(x, y, z) {
+    const bell = new THREE.Group();
+    
+    // Thân chuông
+    const bellGeo = new THREE.CylinderGeometry(0.08, 0.12, 0.15, 12);
+    const bellMat = new THREE.MeshStandardMaterial({
+        color: 0xffd700,
+        roughness: 0.2,
+        metalness: 0.9,
+        emissive: 0xffd700,
+        emissiveIntensity: 0.3
+    });
+    const bellMesh = new THREE.Mesh(bellGeo, bellMat);
+    bellMesh.castShadow = true;
+    bell.add(bellMesh);
+    
+    // Quả đập chuông
+    const clapperGeo = new THREE.SphereGeometry(0.03, 8, 8);
+    const clapper = new THREE.Mesh(clapperGeo, bellMat);
+    clapper.position.y = -0.1;
+    bell.add(clapper);
+    
+    // Dây treo
+    const ropeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.15, 6);
+    const ropeMat = new THREE.MeshStandardMaterial({ color: 0x654321 });
+    const rope = new THREE.Mesh(ropeGeo, ropeMat);
+    rope.position.y = 0.15;
+    bell.add(rope);
+    
+    bell.position.set(x, y, z);
+    bell.userData = { 
+        swingAngle: 0, 
+        swingSpeed: 2 + Math.random(),
+        baseY: y 
+    };
+    return bell;
+}
+
+// Thêm chuông treo
+const bells = [];
+if (!isLowEndDevice) {
+    const bell1 = createBell(-1.5, 1.5, 2.5);
+    bells.push(bell1);
+    scene.add(bell1);
+    
+    const bell2 = createBell(1.5, 1.5, 2.5);
+    bells.push(bell2);
+    scene.add(bell2);
+}
+
+// Dấu chân trên tuyết (Footprints)
+function createFootprint(x, z, rotation) {
+    const footprint = new THREE.Group();
+    
+    const fpMat = new THREE.MeshStandardMaterial({
+        color: 0xd0e0f0,
+        roughness: 0.9
+    });
+    
+    // Gót chân
+    const heel = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.08, 0.02, 8),
+        fpMat
+    );
+    heel.position.z = -0.06;
+    footprint.add(heel);
+    
+    // Bàn chân
+    const sole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.1, 0.09, 0.02, 8),
+        fpMat
+    );
+    sole.position.z = 0.04;
+    footprint.add(sole);
+    
+    footprint.position.set(x, 0.01, z);
+    footprint.rotation.y = rotation;
+    return footprint;
+}
+
+// Tạo đường đi bằng dấu chân
+const footprintCount = isLowEndDevice ? 6 : 12;
+for (let i = 0; i < footprintCount; i++) {
+    const t = i / footprintCount;
+    const angle = -Math.PI / 4;
+    const distance = 3 + i * 0.4;
+    
+    const x = Math.cos(angle) * distance - 1;
+    const z = Math.sin(angle) * distance - 1;
+    const side = i % 2 === 0 ? 0.1 : -0.1;
+    
+    const footprint = createFootprint(x + side, z, angle + Math.PI / 2);
+    scene.add(footprint);
+}
+
+// Particles lấp lánh trong không khí (Magic dust)
+const magicDustCount = isLowEndDevice ? 30 : 60;
+const magicDustGeo = new THREE.BufferGeometry();
+const magicDustPos = new Float32Array(magicDustCount * 3);
+const magicDustVel = [];
+
+for (let i = 0; i < magicDustCount; i++) {
+    magicDustPos[i * 3] = (Math.random() - 0.5) * 15;
+    magicDustPos[i * 3 + 1] = Math.random() * 8;
+    magicDustPos[i * 3 + 2] = (Math.random() - 0.5) * 15;
+    
+    magicDustVel.push({
+        x: (Math.random() - 0.5) * 0.01,
+        y: (Math.random() - 0.5) * 0.01,
+        phase: Math.random() * Math.PI * 2
+    });
+}
+
+magicDustGeo.setAttribute('position', new THREE.BufferAttribute(magicDustPos, 3));
+const magicDustMat = new THREE.PointsMaterial({
+    color: 0xffd700,
+    size: 0.03,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+});
+const magicDust = new THREE.Points(magicDustGeo, magicDustMat);
+scene.add(magicDust);
+
 // Animation loop nâng cao
 const clock = new THREE.Clock();
 
@@ -904,6 +1364,69 @@ function animate() {
     // Vòng sáng magic
     magicCircle.rotation.z = t * 0.2;
     magicCircleMat.opacity = 0.1 + Math.sin(t * 1.5) * 0.08;
+
+    // ===== ANIMATION CÁC THÀNH PHẦN GIÁNG SINH BACKGROUND =====
+    
+    // Shooting stars (Sao băng)
+    shootingStars.forEach((star, index) => {
+        star.userData.life += 0.016;
+        
+        if (star.userData.life >= star.userData.maxLife) {
+            // Reset sao băng
+            star.position.set(
+                (Math.random() - 0.5) * 20,
+                10 + Math.random() * 10,
+                (Math.random() - 0.5) * 20
+            );
+            star.userData.life = 0;
+        } else {
+            // Di chuyển sao băng
+            star.position.add(star.userData.velocity);
+            
+            // Fade out khi gần hết life
+            const lifeRatio = star.userData.life / star.userData.maxLife;
+            star.material.opacity = lifeRatio < 0.3 ? lifeRatio / 0.3 : (1 - lifeRatio) / 0.7;
+        }
+    });
+    
+    // Clouds (Đám mây) - di chuyển chậm
+    clouds.forEach(cloud => {
+        cloud.position.x += cloud.userData.speed;
+        if (cloud.position.x > 15) {
+            cloud.position.x = -15;
+        }
+        // Lên xuống nhẹ
+        cloud.position.y += Math.sin(t * 0.3 + cloud.position.x) * 0.001;
+    });
+    
+    // Lamp posts - nhấp nháy nhẹ
+    lampPosts.forEach((lamp, index) => {
+        const light = lamp.userData.light;
+        light.intensity = lamp.userData.baseLightIntensity + Math.sin(t * 2 + index) * 0.2;
+    });
+    
+    // Bells - đung đưa nhẹ
+    bells.forEach((bell, index) => {
+        bell.userData.swingAngle = Math.sin(t * bell.userData.swingSpeed + index) * 0.15;
+        bell.rotation.z = bell.userData.swingAngle;
+        bell.position.y = bell.userData.baseY + Math.abs(Math.sin(t * bell.userData.swingSpeed + index)) * 0.02;
+    });
+    
+    // Magic dust - lơ lửng và lấp lánh
+    const mdp = magicDust.geometry.attributes.position.array;
+    for (let i = 0; i < magicDustCount; i++) {
+        mdp[i * 3] += magicDustVel[i].x;
+        mdp[i * 3 + 1] += Math.sin(t + magicDustVel[i].phase) * 0.005;
+        
+        // Reset nếu ra ngoài phạm vi
+        if (Math.abs(mdp[i * 3]) > 8 || mdp[i * 3 + 1] < 0 || mdp[i * 3 + 1] > 8) {
+            mdp[i * 3] = (Math.random() - 0.5) * 15;
+            mdp[i * 3 + 1] = Math.random() * 8;
+            mdp[i * 3 + 2] = (Math.random() - 0.5) * 15;
+        }
+    }
+    magicDust.geometry.attributes.position.needsUpdate = true;
+    magicDustMat.opacity = 0.4 + Math.sin(t * 1.5) * 0.2;
 
     controls.update();
     renderer.render(scene, camera);
