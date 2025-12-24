@@ -162,7 +162,7 @@ const groundSparkles = new THREE.Points(sparklesOnGround, sparklesGroundMat);
 scene.add(groundSparkles);
 
 
-// Cây thông 3D cao cấp với chi tiết phong phú
+// Cây thông 3D cao cấp với chi tiết phong phú và tối ưu
 function createRealisticTree() {
     const tree = new THREE.Group();
     
@@ -173,77 +173,103 @@ function createRealisticTree() {
         return c;
     };
     
-    // Thân cây chi tiết hơn
-    const trunkGeo = new THREE.CylinderGeometry(0.12, 0.25, 1.6, 16);
+    // Thân cây với texture thực tế hơn
+    const trunkSegments = isLowEndDevice ? 12 : 18;
+    const trunkGeo = new THREE.CylinderGeometry(0.14, 0.28, 1.8, trunkSegments);
     const trunkMat = new THREE.MeshStandardMaterial({ 
-        color: 0x5a4030, 
-        roughness: 0.9,
-        metalness: 0.05,
+        color: 0x4a3526, 
+        roughness: 0.95,
+        metalness: 0.02,
         emissive: 0x2a1810,
-        emissiveIntensity: 0.1
+        emissiveIntensity: 0.12
     });
     const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.y = 0.8;
+    trunk.position.y = 0.9;
     trunk.castShadow = true;
     trunk.receiveShadow = true;
     tree.add(trunk);
     
-    // Vật liệu lá tươi và lá đậm với emissive
-    const needleMatLight = new THREE.MeshStandardMaterial({
-        color: 0x3d8a52,
-        roughness: 0.75,
-        metalness: 0.15,
-        emissive: 0x1a3a25,
-        emissiveIntensity: 0.15,
+    // Palette màu xanh phong phú cho lá
+    const greenShades = [
+        { color: 0x2d6a3e, emissive: 0x1a3a25, intensity: 0.18 },
+        { color: 0x3d8a52, emissive: 0x1f4a2f, intensity: 0.15 },
+        { color: 0x1f4d2e, emissive: 0x0f2418, intensity: 0.12 },
+        { color: 0x4a9d5f, emissive: 0x2d6a3e, intensity: 0.2 }
+    ];
+    
+    // Vật liệu lá với nhiều biến thể
+    const needleMaterials = greenShades.map(shade => new THREE.MeshStandardMaterial({
+        color: shade.color,
+        roughness: 0.7 + Math.random() * 0.15,
+        metalness: 0.1 + Math.random() * 0.1,
+        emissive: shade.emissive,
+        emissiveIntensity: shade.intensity,
         side: THREE.DoubleSide
-    });
-    const needleMatDark = new THREE.MeshStandardMaterial({
-        color: 0x2d5c3a,
-        roughness: 0.85,
-        metalness: 0.08,
-        emissive: 0x0f2418,
-        emissiveIntensity: 0.1,
-        side: THREE.DoubleSide
-    });
+    }));
     
     const branchMatBase = new THREE.MeshStandardMaterial({
-        color: 0x1f3a28,
-        roughness: 0.92,
-        metalness: 0.04
+        color: 0x2d4a30,
+        roughness: 0.9,
+        metalness: 0.05,
+        emissive: 0x1a2a1f,
+        emissiveIntensity: 0.08
     });
     
-    function createBranch(length, thickness, tone) {
+    function createBranch(length, thickness, tone, layerIndex) {
         const branch = new THREE.Group();
-        const stemGeo = new THREE.CylinderGeometry(thickness * 0.35, thickness, length, 8);
+        
+        // Cành chính với góc cạnh tự nhiên
+        const stemSegments = isLowEndDevice ? 6 : 10;
+        const stemGeo = new THREE.CylinderGeometry(
+            thickness * 0.3, 
+            thickness, 
+            length, 
+            stemSegments
+        );
         const stemMat = branchMatBase.clone();
-        stemMat.color.copy(tintColor(0x1f3a28, tone * 0.25));
+        stemMat.color.copy(tintColor(0x2d4a30, tone * 0.2));
         const stem = new THREE.Mesh(stemGeo, stemMat);
         stem.rotation.z = Math.PI / 2;
         stem.position.x = length / 2;
-        stem.castShadow = true;
+        stem.castShadow = isLowEndDevice ? false : true;
         branch.add(stem);
         
-        const needleCount = Math.floor(length * 20);
+        // Số lượng kim lá tùy theo thiết bị
+        const needleDensity = isLowEndDevice ? 15 : 28;
+        const needleCount = Math.floor(length * needleDensity);
+        
         for (let i = 0; i < needleCount; i++) {
             const t = i / needleCount;
             const x = t * length;
             
-            const needleLen = 0.15 + Math.random() * 0.1;
-            const needleGeo = new THREE.ConeGeometry(0.018, needleLen, 5);
-            const mat = Math.random() > 0.4 ? needleMatDark.clone() : needleMatLight.clone();
-            const frost = tone * 0.25 + (1 - t) * 0.15;
-            mat.color.lerp(new THREE.Color(0xd8f0dd), frost * 0.35);
+            // Chiều dài kim lá biến thiên tự nhiên
+            const needleLen = 0.12 + Math.random() * 0.14 + (1 - t) * 0.05;
+            const needleThickness = 0.015 + Math.random() * 0.008;
+            const needleSegments = isLowEndDevice ? 4 : 6;
+            const needleGeo = new THREE.ConeGeometry(needleThickness, needleLen, needleSegments);
+            
+            // Chọn màu ngẫu nhiên từ palette
+            const mat = needleMaterials[Math.floor(Math.random() * needleMaterials.length)].clone();
+            
+            // Hiệu ứng sương giá/tuyết phủ
+            const frost = tone * 0.3 + (1 - t) * 0.2 + Math.random() * 0.1;
+            mat.color.lerp(new THREE.Color(0xe0f5e8), frost * 0.25);
             
             const needle = new THREE.Mesh(needleGeo, mat);
             needle.position.x = x;
             
-            const angle = Math.random() * Math.PI * 2;
-            const spread = 0.04 + t * 0.03;
-            needle.position.y = Math.cos(angle) * spread;
+            // Phân bố kim lá tự nhiên hơn
+            const angle = (i * 137.5) * (Math.PI / 180); // Golden angle
+            const spread = (0.04 + t * 0.04) * (0.8 + Math.random() * 0.4);
+            const verticalVariation = (Math.random() - 0.5) * 0.02;
+            
+            needle.position.y = Math.cos(angle) * spread + verticalVariation;
             needle.position.z = Math.sin(angle) * spread;
             
-            needle.rotation.z = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
-            needle.rotation.y = angle;
+            // Góc xoay kim lá tự nhiên
+            needle.rotation.z = Math.PI / 2 + (Math.random() - 0.5) * 0.6;
+            needle.rotation.y = angle + (Math.random() - 0.5) * 0.3;
+            needle.rotation.x = (Math.random() - 0.5) * 0.2;
             
             branch.add(needle);
         }
@@ -251,39 +277,105 @@ function createRealisticTree() {
         return branch;
     }
     
-    const treeHeight = 4.8;
-    const layerCount = 12;
+    // Cấu trúc cây thực tế hơn
+    const treeHeight = 5.0;
+    const layerCount = isLowEndDevice ? 10 : 15;
     
     for (let layer = 0; layer < layerCount; layer++) {
         const t = layer / layerCount;
-        const y = 1.2 + t * (treeHeight - 1.2);
-        const layerRadius = 1.6 * (1 - t * 0.85);
-        const branchCount = Math.floor(7 - t * 2);
-        const branchLength = layerRadius * (0.9 + Math.random() * 0.15);
-        const tone = 0.45 + (1 - t) * 0.3;
+        const y = 1.3 + t * (treeHeight - 1.3);
         
+        // Bán kính giảm dần theo hàm tự nhiên
+        const layerRadius = 1.7 * Math.pow(1 - t, 0.7);
+        
+        // Số cành mỗi tầng
+        const branchCount = Math.floor(8 - t * 3.5);
+        
+        // Độ dài cành biến thiên
+        const branchLength = layerRadius * (0.85 + Math.random() * 0.25);
+        const tone = 0.5 + (1 - t) * 0.35;
+        
+        // Tạo nhiều cành hơn với rotation offset
         for (let b = 0; b < branchCount; b++) {
-            const angle = (b / branchCount) * Math.PI * 2 + layer * 0.5;
-            const branch = createBranch(branchLength, 0.03 - t * 0.012, tone);
+            const baseAngle = (b / branchCount) * Math.PI * 2;
+            const angleOffset = layer * 0.618; // Golden ratio
+            const angle = baseAngle + angleOffset + (Math.random() - 0.5) * 0.2;
+            
+            const branch = createBranch(
+                branchLength, 
+                0.035 - t * 0.016, 
+                tone,
+                layer
+            );
             
             branch.position.y = y;
             branch.rotation.y = angle;
-            branch.rotation.z = 0.25 + (1 - t) * 0.35;
+            
+            // Góc nghiêng cành tự nhiên hơn
+            const droop = 0.15 + (1 - t) * 0.4 + Math.random() * 0.1;
+            branch.rotation.z = droop;
             
             tree.add(branch);
         }
+        
+        // Thêm các cành phụ giữa các tầng
+        if (layer < layerCount - 1 && !isLowEndDevice) {
+            const subBranchCount = Math.floor(branchCount * 0.6);
+            const subY = y + (treeHeight - 1.3) / layerCount * 0.5;
+            const subRadius = layerRadius * 0.85;
+            
+            for (let sb = 0; sb < subBranchCount; sb++) {
+                const subAngle = (sb / subBranchCount) * Math.PI * 2 + angleOffset + 0.5;
+                const subBranch = createBranch(
+                    subRadius * (0.7 + Math.random() * 0.2),
+                    0.025 - t * 0.01,
+                    tone,
+                    layer
+                );
+                
+                subBranch.position.y = subY;
+                subBranch.rotation.y = subAngle;
+                subBranch.rotation.z = 0.25 + (1 - t) * 0.35;
+                
+                tree.add(subBranch);
+            }
+        }
     }
     
-    // Đỉnh cây đẹp hơn
-    const topGeo = new THREE.ConeGeometry(0.1, 0.5, 10);
-    const topMat = needleMatLight.clone();
-    topMat.color.lerp(new THREE.Color(0xe0f5e5), 0.4);
-    topMat.emissive = new THREE.Color(0x2d6a3e);
-    topMat.emissiveIntensity = 0.15;
+    // Đỉnh cây chi tiết với nhiều lớp
+    const topSegments = isLowEndDevice ? 8 : 12;
+    const topGeo = new THREE.ConeGeometry(0.12, 0.6, topSegments);
+    const topMat = needleMaterials[1].clone();
+    topMat.color.lerp(new THREE.Color(0xd8f0dd), 0.3);
+    topMat.emissive = new THREE.Color(0x3d8a52);
+    topMat.emissiveIntensity = 0.25;
     const top = new THREE.Mesh(topGeo, topMat);
-    top.position.y = treeHeight + 0.55;
+    top.position.y = treeHeight + 0.65;
     top.castShadow = true;
     tree.add(top);
+    
+    // Thêm các kim lá nhỏ quanh đỉnh
+    if (!isLowEndDevice) {
+        const topNeedleCount = 20;
+        for (let i = 0; i < topNeedleCount; i++) {
+            const angle = (i / topNeedleCount) * Math.PI * 2;
+            const radius = 0.08 + Math.random() * 0.06;
+            const height = treeHeight + 0.4 + Math.random() * 0.3;
+            
+            const needleGeo = new THREE.ConeGeometry(0.012, 0.18, 4);
+            const needleMat = topMat.clone();
+            const needle = new THREE.Mesh(needleGeo, needleMat);
+            
+            needle.position.x = Math.cos(angle) * radius;
+            needle.position.y = height;
+            needle.position.z = Math.sin(angle) * radius;
+            
+            needle.rotation.z = Math.PI / 3 + (Math.random() - 0.5) * 0.5;
+            needle.rotation.y = angle;
+            
+            tree.add(needle);
+        }
+    }
     
     return tree;
 }
