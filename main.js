@@ -162,19 +162,12 @@ const groundSparkles = new THREE.Points(sparklesOnGround, sparklesGroundMat);
 scene.add(groundSparkles);
 
 
-// Cây thông 3D cao cấp với chi tiết phong phú
+// Cây thông 3D đơn giản và đẹp mắt
 function createRealisticTree() {
     const tree = new THREE.Group();
     
-    const tintColor = (base, factor) => {
-        const c = new THREE.Color(base);
-        const w = new THREE.Color(0xffffff);
-        c.lerp(w, factor);
-        return c;
-    };
-    
-    // Thân cây chi tiết hơn
-    const trunkGeo = new THREE.CylinderGeometry(0.12, 0.25, 1.6, 16);
+    // Thân cây
+    const trunkGeo = new THREE.CylinderGeometry(0.15, 0.22, 1.2, 12);
     const trunkMat = new THREE.MeshStandardMaterial({ 
         color: 0x5a4030, 
         roughness: 0.9,
@@ -183,105 +176,55 @@ function createRealisticTree() {
         emissiveIntensity: 0.1
     });
     const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.y = 0.8;
+    trunk.position.y = 0.6;
     trunk.castShadow = true;
     trunk.receiveShadow = true;
     tree.add(trunk);
     
-    // Vật liệu lá tươi và lá đậm với emissive
-    const needleMatLight = new THREE.MeshStandardMaterial({
-        color: 0x3d8a52,
-        roughness: 0.75,
-        metalness: 0.15,
-        emissive: 0x1a3a25,
-        emissiveIntensity: 0.15,
-        side: THREE.DoubleSide
-    });
-    const needleMatDark = new THREE.MeshStandardMaterial({
-        color: 0x2d5c3a,
+    // Vật liệu cho các tầng lá
+    const treeMat = new THREE.MeshStandardMaterial({
+        color: 0x2d6a3e,
         roughness: 0.85,
-        metalness: 0.08,
-        emissive: 0x0f2418,
-        emissiveIntensity: 0.1,
-        side: THREE.DoubleSide
+        metalness: 0.1,
+        emissive: 0x1a3a25,
+        emissiveIntensity: 0.12
     });
     
-    const branchMatBase = new THREE.MeshStandardMaterial({
-        color: 0x1f3a28,
-        roughness: 0.92,
-        metalness: 0.04
+    // Tạo nhiều tầng lá - dạng cone chồng lên nhau
+    const layers = [
+        { radius: 1.6, height: 1.8, y: 1.3 },
+        { radius: 1.4, height: 1.6, y: 2.4 },
+        { radius: 1.2, height: 1.4, y: 3.3 },
+        { radius: 1.0, height: 1.2, y: 4.0 },
+        { radius: 0.8, height: 1.0, y: 4.6 },
+        { radius: 0.6, height: 0.8, y: 5.1 },
+        { radius: 0.4, height: 0.6, y: 5.5 }
+    ];
+    
+    layers.forEach((layer, index) => {
+        const cone = new THREE.Mesh(
+            new THREE.ConeGeometry(layer.radius, layer.height, 16),
+            treeMat.clone()
+        );
+        
+        // Thêm biến thể màu sắc cho mỗi tầng
+        const colorVariation = 1 - (index * 0.08);
+        cone.material.color.multiplyScalar(colorVariation);
+        
+        cone.position.y = layer.y;
+        cone.castShadow = true;
+        cone.receiveShadow = true;
+        tree.add(cone);
     });
     
-    function createBranch(length, thickness, tone) {
-        const branch = new THREE.Group();
-        const stemGeo = new THREE.CylinderGeometry(thickness * 0.35, thickness, length, 8);
-        const stemMat = branchMatBase.clone();
-        stemMat.color.copy(tintColor(0x1f3a28, tone * 0.25));
-        const stem = new THREE.Mesh(stemGeo, stemMat);
-        stem.rotation.z = Math.PI / 2;
-        stem.position.x = length / 2;
-        stem.castShadow = true;
-        branch.add(stem);
-        
-        const needleCount = Math.floor(length * 20);
-        for (let i = 0; i < needleCount; i++) {
-            const t = i / needleCount;
-            const x = t * length;
-            
-            const needleLen = 0.15 + Math.random() * 0.1;
-            const needleGeo = new THREE.ConeGeometry(0.018, needleLen, 5);
-            const mat = Math.random() > 0.4 ? needleMatDark.clone() : needleMatLight.clone();
-            const frost = tone * 0.25 + (1 - t) * 0.15;
-            mat.color.lerp(new THREE.Color(0xd8f0dd), frost * 0.35);
-            
-            const needle = new THREE.Mesh(needleGeo, mat);
-            needle.position.x = x;
-            
-            const angle = Math.random() * Math.PI * 2;
-            const spread = 0.04 + t * 0.03;
-            needle.position.y = Math.cos(angle) * spread;
-            needle.position.z = Math.sin(angle) * spread;
-            
-            needle.rotation.z = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
-            needle.rotation.y = angle;
-            
-            branch.add(needle);
-        }
-        
-        return branch;
-    }
-    
-    const treeHeight = 4.8;
-    const layerCount = 12;
-    
-    for (let layer = 0; layer < layerCount; layer++) {
-        const t = layer / layerCount;
-        const y = 1.2 + t * (treeHeight - 1.2);
-        const layerRadius = 1.6 * (1 - t * 0.85);
-        const branchCount = Math.floor(7 - t * 2);
-        const branchLength = layerRadius * (0.9 + Math.random() * 0.15);
-        const tone = 0.45 + (1 - t) * 0.3;
-        
-        for (let b = 0; b < branchCount; b++) {
-            const angle = (b / branchCount) * Math.PI * 2 + layer * 0.5;
-            const branch = createBranch(branchLength, 0.03 - t * 0.012, tone);
-            
-            branch.position.y = y;
-            branch.rotation.y = angle;
-            branch.rotation.z = 0.25 + (1 - t) * 0.35;
-            
-            tree.add(branch);
-        }
-    }
-    
-    // Đỉnh cây đẹp hơn
-    const topGeo = new THREE.ConeGeometry(0.1, 0.5, 10);
-    const topMat = needleMatLight.clone();
-    topMat.color.lerp(new THREE.Color(0xe0f5e5), 0.4);
+    // Đỉnh cây - cone nhọn
+    const topGeo = new THREE.ConeGeometry(0.25, 0.8, 12);
+    const topMat = treeMat.clone();
+    topMat.color.lerp(new THREE.Color(0xe0f5e5), 0.3);
     topMat.emissive = new THREE.Color(0x2d6a3e);
-    topMat.emissiveIntensity = 0.15;
+    topMat.emissiveIntensity = 0.2;
     const top = new THREE.Mesh(topGeo, topMat);
-    top.position.y = treeHeight + 0.55;
+    top.position.y = 5.9;
     top.castShadow = true;
     tree.add(top);
     
@@ -349,7 +292,7 @@ const halo = new THREE.Mesh(haloGeo, haloMat);
 halo.rotation.x = Math.PI / 2;
 starGroup.add(halo);
 
-starGroup.position.y = 5.35;
+starGroup.position.y = 6.3;
 scene.add(starGroup);
 
 
@@ -363,8 +306,8 @@ const ornamentColors = [
 for (let i = 0; i < 18; i++) {
     const layer = Math.floor(i / 4);
     const idx = i % 4;
-    const y = 1.5 + layer * 0.7;
-    const maxR = 1.3 - layer * 0.16;
+    const y = 1.8 + layer * 0.8;
+    const maxR = 1.4 - layer * 0.18;
     const angle = (idx / 4) * Math.PI * 2 + layer * 0.4;
     const r = maxR * 0.7;
     
@@ -393,8 +336,8 @@ const lightColors = [0xffd700, 0xff69b4, 0x00ffff, 0xff8c00];
 
 for (let i = 0; i < 36; i++) {
     const t = i / 36;
-    const y = 1.2 + t * 3.8;
-    const r = (1.4 - t * 0.95);
+    const y = 1.5 + t * 4.5;
+    const r = (1.5 - t * 1.1);
     const angle = t * Math.PI * 9;
     
     const geo = new THREE.SphereGeometry(0.04, 8, 8);
@@ -574,9 +517,9 @@ const sparklePhase = [];
 
 for (let i = 0; i < sparkleCount; i++) {
     const t = Math.random();
-    const radius = 0.5 + (1 - t) * 1.3;
+    const radius = 0.6 + (1 - t) * 1.4;
     const angle = Math.random() * Math.PI * 2;
-    const y = 1.3 + t * 3.8;
+    const y = 1.6 + t * 4.5;
     sparklePos[i * 3] = Math.cos(angle) * radius;
     sparklePos[i * 3 + 1] = y;
     sparklePos[i * 3 + 2] = Math.sin(angle) * radius;
@@ -608,13 +551,13 @@ const sparkles = new THREE.Points(sparkleGeo, sparkleMat);
 scene.add(sparkles);
 
 // Dây trang trí vàng lấp lánh (tối ưu)
-function createRibbon(turns = 5, height = 3.8, radiusTop = 0.35, radiusBottom = 1.1) {
+function createRibbon(turns = 5, height = 4.5, radiusTop = 0.4, radiusBottom = 1.3) {
     const points = [];
     const steps = 200;
     for (let i = 0; i <= steps; i++) {
         const t = i / steps;
         const angle = t * Math.PI * 2 * turns;
-        const y = 1.2 + t * height;
+        const y = 1.5 + t * height;
         const r = radiusBottom * (1 - t * 0.7) + radiusTop * 0.3;
         points.push(new THREE.Vector3(Math.cos(angle) * r, y, Math.sin(angle) * r));
     }
@@ -686,7 +629,7 @@ const magicParticleVel = [];
 for (let i = 0; i < magicParticleCount; i++) {
     const radius = 0.3 + Math.random() * 0.4;
     const angle = Math.random() * Math.PI * 2;
-    const y = 5.3 + Math.random() * 0.7;
+    const y = 6.2 + Math.random() * 0.7;
     magicParticlePos[i * 3] = Math.cos(angle) * radius;
     magicParticlePos[i * 3 + 1] = y;
     magicParticlePos[i * 3 + 2] = Math.sin(angle) * radius;
@@ -1354,7 +1297,7 @@ function animate() {
         mp[i * 3 + 2] = Math.sin(vel.angle) * vel.radius;
         mp[i * 3 + 1] += vel.ySpeed * 0.01;
         
-        if (mp[i * 3 + 1] < 5.1 || mp[i * 3 + 1] > 6.2) {
+        if (mp[i * 3 + 1] < 6.0 || mp[i * 3 + 1] > 7.1) {
             vel.ySpeed *= -1;
         }
     }
